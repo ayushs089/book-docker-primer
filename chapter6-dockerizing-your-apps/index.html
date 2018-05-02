@@ -154,15 +154,15 @@ as how to work with docker hub registry to host and distribute the images.</p>
 <p><img alt="hub" src="../images/chp6/hub2.png" /></p>
 <p>You will be launched to Dockerhub main page. Now the registration process is complete and you have account in Dockerhub!</p>
 <p><img alt="hub" src="../images/chp6/hub3.png" /></p>
-<h3 id="building-docker-images-a-manual-approach">Building Docker Images - A manual approach</h3>
+<h2 id="building-docker-images-a-manual-approach">Building Docker Images - A manual approach</h2>
 <p>Before we start building automated images, we are going to create a docker image by hand. We have already used the pre built image from the registry in the last session. In this session, however, we are going to create our own image with ghost installed. Since Ghost is a node.js based application, we will base our work on existing official image for <strong>node</strong></p>
-<h4 id="clone-repository-for-java-worker-process">Clone Repository for Java Worker Process</h4>
+<h4 id="clone-repository-for-java-worker-app">Clone Repository for Java worker app</h4>
 <pre><code>git clone https://github.com/schoolofdevops/voting-app-worker.git
 </code></pre>
 
 <h4 id="launch-a-intermediate-container-to-install-worker-app">Launch a intermediate container to install worker app</h4>
 <p>Create a Container with  <strong>schoolofdevops/voteapp-mvn:v1</strong> image</p>
-<pre><code>docker run -idt --name interim schoolofdevops/voteapp-mvn:v1  sh
+<pre><code>docker run -idt --name interim schoolofdevops/voteapp-mvn  sh
 
 </code></pre>
 
@@ -215,7 +215,7 @@ initcron/worker         v1              c0199f782489        34 minutes ago      
 </code></pre>
 
 <p>To push the image,</p>
-<pre><code>docker push initcron/worker:v1
+<pre><code>docker push &lt;dockrhub user id&gt;/worker:v1
 </code></pre>
 
 <h2 id="building-images-with-dockerfile">Building Images with Dockerfile</h2>
