@@ -150,6 +150,108 @@
 <li>peer</li>
 <li>none</li>
 </ul>
+<p>Examine the existing network</p>
+<pre><code>docker network ls
+
+NETWORK ID          NAME                DRIVER              SCOPE
+b3d405dd37e4        bridge              bridge              local
+7527c821537c        host                host                local
+773bea4ca095        none                null                local
+</code></pre>
+
+<p>Creating new network</p>
+<pre><code>docker network create -d bridge mynet
+</code></pre>
+
+<p>validate</p>
+<pre><code>docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+b3d405dd37e4        bridge              bridge              local
+7527c821537c        host                host                local
+4e0d9b1a39f8        mynet               bridge              local
+773bea4ca095        none                null                local
+</code></pre>
+
+<pre><code>docker network inspect mynet
+
+
+[
+   {
+       &quot;Name&quot;: &quot;mynet&quot;,
+       &quot;Id&quot;: &quot;4e0d9b1a39f859af4811986534c91527146bc9d2ce178e5de02473c0f8ce62d5&quot;,
+       &quot;Created&quot;: &quot;2018-05-03T04:44:19.187296148Z&quot;,
+       &quot;Scope&quot;: &quot;local&quot;,
+       &quot;Driver&quot;: &quot;bridge&quot;,
+       &quot;EnableIPv6&quot;: false,
+       &quot;IPAM&quot;: {
+           &quot;Driver&quot;: &quot;default&quot;,
+           &quot;Options&quot;: {},
+           &quot;Config&quot;: [
+               {
+                   &quot;Subnet&quot;: &quot;172.18.0.0/16&quot;,
+                   &quot;Gateway&quot;: &quot;172.18.0.1&quot;
+               }
+           ]
+       },
+       &quot;Internal&quot;: false,
+       &quot;Attachable&quot;: false,
+       &quot;Ingress&quot;: false,
+       &quot;ConfigFrom&quot;: {
+           &quot;Network&quot;: &quot;&quot;
+       },
+       &quot;ConfigOnly&quot;: false,
+       &quot;Containers&quot;: {},
+       &quot;Options&quot;: {},
+       &quot;Labels&quot;: {}
+   }
+]
+</code></pre>
+
+<h4 id="launching-containers-in-different-bridges">Launching containers in different bridges</h4>
+<p>Launch two containers <strong>nt01</strong> and <strong>nt02</strong> in <strong>default</strong> bridge network</p>
+<pre><code>docker container run -idt --name nt01 alpine sh
+docker container run -idt --name nt02 alpine sh
+</code></pre>
+
+<p>Launch two containers <strong>nt03</strong> and <strong>nt04</strong> in <strong>mynet</strong> bridge network</p>
+<pre><code>docker container run -idt --name nt03 --net mynet alpine sh
+docker container run -idt --name nt04 --net mynet alpine sh
+</code></pre>
+
+<p>Now, lets examine if they can interconnect,</p>
+<pre><code>
+docker exec nt01 ifconfig eth0
+docker exec nt02 ifconfig eth0
+docker exec nt03 ifconfig eth0
+docker exec nt04 ifconfig eth0
+
+</code></pre>
+
+<p>This is what I see</p>
+<p>nt01 :  172.17.0.18
+nt02 :  172.17.0.19
+nt03 :  172.18.0.2
+nt04 :  172.18.0.3</p>
+<p>Create a table with the ips on your host.  Once you do that,</p>
+<p>Try to,
+  * ping from <strong>nt01</strong> to <strong>nt02</strong>
+  * ping from <strong>nt01</strong> to <strong>nt03</strong>
+  * ping from <strong>nt03</strong> to <strong>nt04</strong>
+  * ping from <strong>nt03</strong> to <strong>nt02</strong></p>
+<p>e.g.</p>
+<p>[replace ip addresses as per your setup]</p>
+<pre><code>docker exec nt01  ping 172.17.0.19
+
+docker exec nt01  ping 172.18.0.2
+
+docker exec nt03  ping 172.17.0.19
+
+docker exec nt03  ping 172.18.0.2
+
+
+</code></pre>
+
+<p>Clearly, these two are two differnt subnets/networks even though running on the same host. <strong>nt01</strong> and <strong>nt02</strong> can connect with each other, whereas <strong>nt03</strong>  and <strong>nt04</strong> can connect. But connection between containers attached to two different subnets is not possible.</p>
               
             </div>
           </div>
