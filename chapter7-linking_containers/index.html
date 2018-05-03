@@ -173,6 +173,11 @@ docker logs worker
 
 <h3 id="launching-inter-linked-services-with-compose-spec">Launching inter linked services with Compose spec</h3>
 <p>Lets now create a docker-compose spec and launch the services with docker-compose utility.</p>
+<p>Create a directory to keep the compose files. Lets say <strong>stack</strong></p>
+<pre><code>mkdir stack
+cd stack
+</code></pre>
+
 <p>file: docker-compose.yml</p>
 <pre><code>vote:
   image: schoolofdevops/vote
