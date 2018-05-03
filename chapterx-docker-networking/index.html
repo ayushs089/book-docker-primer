@@ -232,10 +232,10 @@ docker exec nt04 ifconfig eth0
 </code></pre>
 
 <p>This is what I see</p>
-<p>nt01 :  172.17.0.18
-nt02 :  172.17.0.19
-nt03 :  172.18.0.2
-nt04 :  172.18.0.3</p>
+<p>nt01 :  172.17.0.18</p>
+<p>nt02 :  172.17.0.19</p>
+<p>nt03 :  172.18.0.2</p>
+<p>nt04 :  172.18.0.3</p>
 <p>Create a table with the ips on your host.  Once you do that,</p>
 <p>Try to,
   * ping from <strong>nt01</strong> to <strong>nt02</strong>
@@ -256,6 +256,21 @@ docker exec nt03  ping 172.18.0.2
 </code></pre>
 
 <p>Clearly, these two are two differnt subnets/networks even though running on the same host. <strong>nt01</strong> and <strong>nt02</strong> can connect with each other, whereas <strong>nt03</strong>  and <strong>nt04</strong> can connect. But connection between containers attached to two different subnets is not possible.</p>
+<h4 id="using-none-network-driver">Using None Network Driver</h4>
+<pre><code>docker container run -idt --name nt05 --net none alpine sh
+
+docker exec -it nt05 sh
+
+ifconfig
+</code></pre>
+
+<h4 id="using-host-network-driver">Using Host Network Driver</h4>
+<pre><code>docker container run -idt --name nt05 --net host  alpine sh
+
+docker exec -it nt05 sh
+
+ifconfig
+</code></pre>
               
             </div>
           </div>
