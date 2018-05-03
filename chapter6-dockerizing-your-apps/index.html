@@ -73,11 +73,11 @@
     
         <ul>
         
-            <li><a class="toctree-l4" href="#registering-with-the-registry-creating-an-account-on-dockerhub">Registering with the Registry : Creating an Account on DockerHub</a></li>
+            <li><a class="toctree-l4" href="#lab-registering-with-the-dockerhub">Lab: Registering with the DockerHub</a></li>
         
-            <li><a class="toctree-l4" href="#building-docker-images-a-manual-approach">Building Docker Images - A manual approach</a></li>
+            <li><a class="toctree-l4" href="#lab-building-docker-images-a-manual-approach">Lab: Building Docker Images - A manual approach</a></li>
         
-            <li><a class="toctree-l4" href="#building-images-with-dockerfile">Building Images with Dockerfile</a></li>
+            <li><a class="toctree-l4" href="#lab-building-images-with-dockerfile">Lab: Building Images with Dockerfile</a></li>
         
         </ul>
     
@@ -95,6 +95,17 @@
                 <li class="">
                     
     <a class="" href="../persistent-volumes/">Docker Data Persistence</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Advanced Topics</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../swarm-networking-deepdive/">SWARM Networking Deep Dive</a>
                 </li>
     </ul>
 	    </li>
@@ -140,7 +151,7 @@
 pre built images, port mapping, inspecting and updating containers, limiting resources etc., In this
 chapter, we are going to learn about how to build containers for your individual applications, as well
 as how to work with docker hub registry to host and distribute the images.</p>
-<h3 id="registering-with-the-registry-creating-an-account-on-dockerhub">Registering with the Registry : Creating an Account on DockerHub</h3>
+<h3 id="lab-registering-with-the-dockerhub">Lab: Registering with the DockerHub</h3>
 <p>Since we are going to start working with the registry, build and push images to it later, its essential to have our own account on the registry. For the purpose of this tutorial, we are going to use the hosted registry i.e. Dockerhub.</p>
 <p>Steps to create Dockerhub account</p>
 <h4 id="step-1">Step 1:</h4>
@@ -154,7 +165,7 @@ as how to work with docker hub registry to host and distribute the images.</p>
 <p><img alt="hub" src="../images/chp6/hub2.png" /></p>
 <p>You will be launched to Dockerhub main page. Now the registration process is complete and you have account in Dockerhub!</p>
 <p><img alt="hub" src="../images/chp6/hub3.png" /></p>
-<h2 id="building-docker-images-a-manual-approach">Building Docker Images - A manual approach</h2>
+<h2 id="lab-building-docker-images-a-manual-approach">Lab: Building Docker Images - A manual approach</h2>
 <p>Before we start building automated images, we are going to create a docker image by hand. We have already used the pre built image from the registry in the last session. In this session, however, we are going to create our own image with ghost installed. Since Ghost is a node.js based application, we will base our work on existing official image for <strong>node</strong></p>
 <h4 id="clone-repository-for-java-worker-app">Clone Repository for Java worker app</h4>
 <pre><code>git clone https://github.com/schoolofdevops/voting-app-worker.git
@@ -195,7 +206,7 @@ mvn package
 </code></pre>
 
 <p>Test before pushing  by launching container with the packaged app</p>
-<pre><code>  docker run -idt  --name test-worker  &lt;docker hub user id &gt;/worker:v1 java -jar target/worker-jar-with-dependencies.jar
+<pre><code>  docker run --rm -it  &lt;docker hub user id &gt;/worker:v1 java -jar target/worker-jar-with-dependencies.jar
 </code></pre>
 
 <h5 id="push-image-to-registry">Push Image to registry</h5>
@@ -218,7 +229,7 @@ initcron/worker         v1              c0199f782489        34 minutes ago      
 <pre><code>docker push &lt;dockrhub user id&gt;/worker:v1
 </code></pre>
 
-<h2 id="building-images-with-dockerfile">Building Images with Dockerfile</h2>
+<h2 id="lab-building-images-with-dockerfile">Lab: Building Images with Dockerfile</h2>
 <p>Now, lets build the same image, this time with Dockerfile. To do this, create a file by name <strong>Dockerfile</strong> in the root of the source code.</p>
 <p>file: Dockerfile</p>
 <pre><code>FROM schoolofdevops/maven
@@ -227,11 +238,9 @@ WORKDIR /app
 
 COPY .  .
 
-RUN mvn package
-
-COPY target/worker-jar-with-dependencies.jar /run/worker.jar
-
-RUN rm -rf /app/*
+RUN mvn package &amp;&amp; \
+    mv target/worker-jar-with-dependencies.jar /run/worker.jar &amp;&amp; \
+    rm -rf /app/*
 
 CMD java  -jar /run/worker.jar
 
@@ -251,12 +260,7 @@ docker image ls
 
 <p>This time, it does not build everything, but uses cache.</p>
 <p>Testing the image</p>
-<pre><code>docker container run -idt --name workertest2 &lt;dockrhub user id&gt;/worker:v2
-
-docker container ls
-
-docker logs workertest2
-
+<pre><code>docker container run --rm -it  &lt;dockrhub user id&gt;/worker:v2
 
 </code></pre>
 
