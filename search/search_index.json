@@ -494,6 +494,16 @@
             "location": "/swarm-networking-deepdive/#additional-commands", 
             "text": "tail -f syslog\ntcpdump -i eth0 udp and port 4789\ntcpdump -i eth0 esp\nip addr\nip link\niptables -t nat -nvL   To see namespaces on the docker host   cd /var/run\nln -s /var/run/docker/netns netns\nip netns  docker network ls\n[company network and ns ids]", 
             "title": "Additional Commands"
+        }, 
+        {
+            "location": "/docker-security/", 
+            "text": "References:\n\n\nDocker Security Labs : https://github.com/docker/labs/tree/master/security\n\n\nDocker Bench Security Scan : https://github.com/docker/docker-bench-security\n\n\nContent Trust : https://github.com/docker/labs/blob/master/security/trust/README.md\n\n\nUser Namespaces : https://github.com/docker/labs/blob/master/security/userns/README.md\n\n\nSeccomp:  https://docs.docker.com/engine/security/seccomp/#significant-syscalls-blocked-by-the-default-profile\n\n\nSecrets:\nhttps://github.com/docker/labs/blob/master/security/secrets/README.md", 
+            "title": "Docker Security"
+        }, 
+        {
+            "location": "/docker-security/#references", 
+            "text": "Docker Security Labs : https://github.com/docker/labs/tree/master/security  Docker Bench Security Scan : https://github.com/docker/docker-bench-security  Content Trust : https://github.com/docker/labs/blob/master/security/trust/README.md  User Namespaces : https://github.com/docker/labs/blob/master/security/userns/README.md  Seccomp:  https://docs.docker.com/engine/security/seccomp/#significant-syscalls-blocked-by-the-default-profile  Secrets:\nhttps://github.com/docker/labs/blob/master/security/secrets/README.md", 
+            "title": "References:"
         }
     ]
 }
