@@ -2,51 +2,42 @@
 
 In the previous chapter, we have learnt about container lifecycle management including how to create, launch, connect to, stop and remove containers. In this chapter, we are going to learn how to launch a container with a pre built app image and how to access the app with published ports. We will also learn about common container operations such as inspecting container information, checking logs and performance stats, renaming and updating the properties of a container, limiting resources etc.  
 
-As part of the tutorial, we are going to setup a shiny new blogging/publishing site. To set it up, we will use a node.js based framework called **ghost**, a simple, fast, and SEO friendly alternative to more sophisticated publishing platforms such as wordpress. However, its purely gives us a blogging platform.  
+As part of this lab, we are going to launch a python based webapp for a sample voting application.    
 
 ### Launching a container with a pre built app image  
 
-To launch ghost container run the following command. Don't bother about the new flag **-P** now. We will explain about that flag later in this chapter  
+To launch vote container run the following command. Don't bother about the new flag **-P** now. We will explain about that flag later in this chapter  
 ```
-docker run -itd -P ghost:0.10.1
+docker container run  -idt -P  schoolofdevops/vote
 ```  
 [Output]  
 
 ```
-Unable to find image 'ghost:0.10.1' locally
-0.10.1: Pulling from library/ghost
-
-8ad8b3f87b37: Pull complete
-751fe39c4d34: Pull complete
-3c8031bea3fa: Pull complete
-854b52827bb4: Pull complete
-f2c2db6ff75a: Pull complete
-8e874614dce5: Pull complete
-3aa1c5caad55: Pull complete
-0cb1edc0454a: Pull complete
-6d8ba59589a6: Pull complete
-bff20c590458: Pull complete
-Digest: sha256:2258f67d3cc513dbf205d5e793e6a9d7359ba28cf16fc5dce08b4e5d2b982245
-Status: Downloaded newer image for ghost:0.10.1
-3e3b4f0b54dc6d24ee95f24dcbd6472fce541568e1fbb56c982913ca4cb58e15
+Unable to find image 'schoolofdevops/vote:latest' locally
+latest: Pulling from schoolofdevops/vote
+Digest: sha256:9195942ea654fa8d8aeb37900be5619215c08e7e1bef0b7dfe4c04a9cc20a8c2
+Status: Downloaded newer image for schoolofdevops/vote:latest
+7d58ecc05754b5fd192c4ecceae334ac22565684c6923ea332bff5c88e3fca2b
 ```
 Lets check the status of the container  
 ```
-docker ps
+docker ps -l
 ```  
 [Output]  
 
 ```
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES
-3e3b4f0b54dc        ghost:0.10.1        "/entrypoint.sh npm s"   7 seconds ago       Up 5 seconds        0.0.0.0:32768->2368/tcp  hungry_lalande
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                   NAMES
+7d58ecc05754        schoolofdevops/vote   "gunicorn app:app -b…"   27 seconds ago      Up 26 seconds       0.0.0.0:32768->80/tcp   peaceful_varahamihira
 ```  
 
 ### Renaming the container  
 We can rename the container by using following command  
 ```
-docker rename hungry_lalande ghost
+docker rename 7d58ecc05754 vote
 ```  
-We have changed container's automatically generated name to ghost. This new name can be of your choice. The point to understand is this command takes two arguments. The **Old_name followed by New_name**
+[replace 7d58ecc05754 with the actual container id on your system ]
+
+We have changed container's automatically generated name to **vote**. This new name can be of your choice. The point to understand is this command takes two arguments. The **Old_name followed by New_name**
 Run docker ps command to check the effect of changes  
 ```
 docker ps
@@ -54,53 +45,33 @@ docker ps
 [Output]  
 
 ```
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES
-3e3b4f0b54dc        ghost:0.10.1        "/entrypoint.sh npm s"   12 minutes ago      Up 12 minutes       0.0.0.0:32768->2368/tcp   ghost
-```  
-As you can see here, the container is renamed to **ghost**. This makes referencing container in cli very much easier.  
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                   NAMES
+7d58ecc05754        schoolofdevops/vote   "gunicorn app:app -b…"   3 minutes ago       Up 3 minutes        0.0.0.0:32768->80/tcp   vote
+```
 
-### Ready to experience Ghost?  
-Let's see what this **ghost** application does by connecting to that application. For that we need,  
+As you can see here, the container is renamed to **vote**. This makes referencing container in cli very much easier.  
+
+### Ready to  vote ?  
+Let's see what this **vote** application does by connecting to that application. For that we need,  
   * Host machine's IP  
   * Container's port which is mapped to a host's port
-To find out host machine's IP, we will use **docker machine**. More about this docker orchestration utility will be explained later in the book. The same can be achieved by running a simple ifconfig command in the host machine. But if you understand what docker machine command can do from the starting itself, it will benefit you to understand about this utility quite easily  
-
-```
-docker-machine ip default
-```  
-
-**TODO:Command is not working - Host does not exist **  
 
 Let's find out the port mapping of container to host. Docker provides subcommand called **port** which does this job  
 
 ```
-docker port ghost  
+docker port vote  
 ```  
 [Output]  
 
 ```
-2368/tcp -> 0.0.0.0:32768
+80/tcp -> 0.0.0.0:32768
 ```  
 So whatever traffic the host gets in port **2368** will be mapped to container's port **32768**  
 
 Let's connect to http://IP_ADDRESS:PORT to see the actual application  
 
-![ghost-welcome](images/ghost-welcome.png)
 
-### Configure blog and add some content  
-Let us set up ghost now. Let log into admin console of ghost by visiting following URL  
-```
-http://HOST:PORT/ghost
-```  
-Now follow these instructions  
-![setup](images/setup-1.png)  
-![setup](images/setup-2.png)  
-![setup](images/setup-3.png)  
-![setup](images/setup-4.png)  
-![setup](images/setup-5.png)  
 
-There you go. Now you have successfully published an article on ghost  
-Visit the homepage again to see it  
 
 ### Finding Everything about the running  container
 This topic discusses about finding metadata of containers. These metadata include various parameters like,  
@@ -113,239 +84,28 @@ This topic discusses about finding metadata of containers. These metadata includ
 Lets try this inspect subcommand in action  
 
 ```
-docker inspect ghost
+docker inspect vote
 ```  
 
-[Output]  
-
-```
-[
-    {
-        "Id": "3e3b4f0b54dc6d24ee95f24dcbd6472fce541568e1fbb56c982913ca4cb58e15",
-        "Created": "2016-09-15T14:07:10.939365783Z",
-        "Path": "/entrypoint.sh",
-        "Args": [
-            "npm",
-            "start"
-        ],
-        "State": {
-            "Status": "running",
-            "Running": true,
-            "Paused": false,
-            "Restarting": false,
-            "OOMKilled": false,
-            "Dead": false,
-            "Pid": 6219,
-            "ExitCode": 0,
-            "Error": "",
-            "StartedAt": "2016-09-15T14:07:11.903893634Z",
-            "FinishedAt": "0001-01-01T00:00:00Z"
-        },
-        "Image": "sha256:b73bd21ec0477e02c853b6b086a67d96af56fd62e0fa3d81b17893fa923d9873",
-        "ResolvConfPath": "/var/lib/docker/containers/3e3b4f0b54dc6d24ee95f24dcbd6472fce541568e1fbb56c982913ca4cb58e15/resolv.conf",
-        "HostnamePath": "/var/lib/docker/containers/3e3b4f0b54dc6d24ee95f24dcbd6472fce541568e1fbb56c982913ca4cb58e15/hostname",
-        "HostsPath": "/var/lib/docker/containers/3e3b4f0b54dc6d24ee95f24dcbd6472fce541568e1fbb56c982913ca4cb58e15/hosts",
-        "LogPath": "/var/lib/docker/containers/3e3b4f0b54dc6d24ee95f24dcbd6472fce541568e1fbb56c982913ca4cb58e15/3e3b4f0b54dc6d24ee95f24dcbd6472fce            541568e1fbb56c982913ca4cb58e15-json.log",
-        "Name": "/ghost",
-        "RestartCount": 0,
-        "Driver": "devicemapper",
-        "MountLabel": "",
-        "ProcessLabel": "",
-        "AppArmorProfile": "",
-        "ExecIDs": null,
-        "HostConfig": {
-            "Binds": null,
-            "ContainerIDFile": "",
-            "LogConfig": {
-                "Type": "json-file",
-                "Config": {}
-            },
-            "NetworkMode": "default",
-            "PortBindings": {},
-            "RestartPolicy": {
-                "Name": "no",
-                "MaximumRetryCount": 0
-            },
-            "AutoRemove": false,
-            "VolumeDriver": "",
-            "VolumesFrom": null,
-            "CapAdd": null,
-            "CapDrop": null,
-            "Dns": [],
-            "DnsOptions": [],
-            "DnsSearch": [],
-            "ExtraHosts": null,
-            "GroupAdd": null,
-            "IpcMode": "",
-            "Cgroup": "",
-            "Links": null,
-            "OomScoreAdj": 0,
-            "PidMode": "",
-            "Privileged": false,
-            "PublishAllPorts": true,
-            "ReadonlyRootfs": false,
-            "SecurityOpt": null,
-            "UTSMode": "",
-            "UsernsMode": "",
-            "ShmSize": 67108864,
-            "Runtime": "runc",
-            "ConsoleSize": [
-                0,
-                0
-            ],
-            "Isolation": "",
-            "CpuShares": 0,
-            "Memory": 0,
-            "CgroupParent": "",
-            "BlkioWeight": 0,
-            "BlkioWeightDevice": null,
-            "BlkioDeviceReadBps": null,
-            "BlkioDeviceWriteBps": null,
-            "BlkioDeviceReadIOps": null,
-            "BlkioDeviceWriteIOps": null,
-            "CpuPeriod": 0,
-            "CpuQuota": 0,
-            "CpusetCpus": "",
-            "CpusetMems": "",
-            "Devices": [],
-            "DiskQuota": 0,
-            "KernelMemory": 0,
-            "MemoryReservation": 0,
-            "MemorySwap": 0,
-            "MemorySwappiness": -1,
-            "OomKillDisable": false,
-            "PidsLimit": 0,
-            "Ulimits": null,
-            "CpuCount": 0,
-            "CpuPercent": 0,
-            "IOMaximumIOps": 0,
-            "IOMaximumBandwidth": 0
-        },
-        "GraphDriver": {
-            "Name": "devicemapper",
-            "Data": {
-                "DeviceId": "23",
-                "DeviceName": "docker-253:0-67238294-fcd6f0f0c695b522cc7939f10eb29edd993a348b25573b5f40a4d59bb459f77c",
-                "DeviceSize": "10737418240"
-            }
-        },
-        "Mounts": [
-            {
-                "Name": "d7cdbdaa5b140554769a38d0c77b91720c6e687c5f2f471f03b5b89cd351cf56",
-                "Source": "/var/lib/docker/volumes/d7cdbdaa5b140554769a38d0c77b91720c6e687c5f2f471f03b5b89cd351cf56/_data",
-                "Destination": "/var/lib/ghost",
-                "Driver": "local",
-                "Mode": "",
-                "RW": true,
-                "Propagation": ""
-            }
-        ],
-        "Config": {
-            "Hostname": "3e3b4f0b54dc",
-            "Domainname": "",
-            "User": "",
-            "AttachStdin": false,
-            "AttachStdout": false,
-            "AttachStderr": false,
-            "ExposedPorts": {
-                "2368/tcp": {}
-            },
-            "Tty": false,
-            "OpenStdin": false,
-            "StdinOnce": false,
-            "Env": [
-                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-                "NPM_CONFIG_LOGLEVEL=info",
-                "NODE_VERSION=4.5.0",
-                "GOSU_VERSION=1.7",
-                "GHOST_SOURCE=/usr/src/ghost",
-                "GHOST_VERSION=0.10.1",
-                "GHOST_CONTENT=/var/lib/ghost"
-            ],
-            "Cmd": [
-                "npm",
-                "start"
-            ],
-            "Image": "ghost:0.10.1",
-            "Volumes": {
-                "/var/lib/ghost": {}
-            },
-            "WorkingDir": "/usr/src/ghost",
-            "Entrypoint": [
-                "/entrypoint.sh"
-            ],
-            "OnBuild": null,
-            "Labels": {}
-        },
-        "NetworkSettings": {
-            "Bridge": "",
-            "SandboxID": "434d8142bfbbd63f45c31a18ee2cb9e24b22afad93c964da69de556d531b89dd",
-            "HairpinMode": false,
-            "LinkLocalIPv6Address": "",
-            "LinkLocalIPv6PrefixLen": 0,
-            "Ports": {
-                "2368/tcp": [
-                    {
-                        "HostIp": "0.0.0.0",
-                        "HostPort": "32768"
-                    }
-                ]
-            },
-            "SandboxKey": "/var/run/docker/netns/434d8142bfbb",
-            "SecondaryIPAddresses": null,
-            "SecondaryIPv6Addresses": null,
-            "EndpointID": "1905f7756420f7c4361478b55291d2157f9a5e6a48338b1a6133cef76b45a5a4",
-            "Gateway": "172.17.0.1",
-            "GlobalIPv6Address": "",
-            "GlobalIPv6PrefixLen": 0,
-            "IPAddress": "172.17.0.2",
-            "IPPrefixLen": 16,
-            "IPv6Gateway": "",
-            "MacAddress": "02:42:ac:11:00:02",
-            "Networks": {
-                "bridge": {
-                    "IPAMConfig": null,
-                    "Links": null,
-                    "Aliases": null,
-                    "NetworkID": "e4b05962c438ad0741bacd05493668c856d837b4615257136d2ce037f81ce42b",
-                    "EndpointID": "1905f7756420f7c4361478b55291d2157f9a5e6a48338b1a6133cef76b45a5a4",
-                    "Gateway": "172.17.0.1",
-                    "IPAddress": "172.17.0.2",
-                    "IPPrefixLen": 16,
-                    "IPv6Gateway": "",
-                    "GlobalIPv6Address": "",
-                    "GlobalIPv6PrefixLen": 0,
-                    "MacAddress": "02:42:ac:11:00:02"
-                }
-            }
-        }
-    }
-]
-
-```  
-This data is represented in JSON format which makes filtering these results easier.  
+Data output by above command contains detailed descriptino of the container an its properties. is represented in JSON format which makes filtering these results easier.  
 
 #### Checking the Stats  
+
 ##### Stats command  
 This command returns a data stream of resource utilization used by containers. The flag **--no-stream** disables data stream and displays only first result  
 
 ```
-docker stats --no-stream=true ghost
+docker stats --no-stream=true vote
+
+docker stats
 ```  
 
-[Output]  
-
-```
-CONTAINER           CPU %               MEM USAGE / LIMIT       MEM %               NET I/O               BLOCK I/O           PIDS
-ghost               0.00%               214.8 MiB / 1.797 GiB   11.67%              146.6 kB / 2.168 MB   0 B / 4.375 MB      0
-
-```  
 
 ##### Top command  
 To display the list of processes and the information about those processes that are running inside the container, we can use **top** command
 
 ```
-docker top ghost
+docker top vote
 ```  
 
 [Output]  
@@ -359,115 +119,38 @@ vagrant             6276                6275                0                   
 ```
 
 ### Examine Logs  
-Docker **log** command is to print the logs of the application inside the container. In our case we will see the log output of ghost application  
+Docker **log** command is to print the logs of the application inside the container. In our case we will see the log output of vote application  
 
 ```
-docker logs ghost
+docker logs vote
 ```  
 
 [Output]  
 
 ```
-POST /ghost/api/v0.1/posts/?include=tags 422 165.523 ms - 120
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 66.134 ms - -
-GET /ghost/api/v0.1/slugs/post/(Untitled)/ 200 43.748 ms - 31
-POST /ghost/api/v0.1/posts/?include=tags 201 73.500 ms - 479
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 107.108 ms - 479
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 261.262 ms - 607
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 92.373 ms - 740
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 197.701 ms - 742
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 109.857 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 239.978 ms - 742
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 176.895 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 80.514 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 127.901 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 279.284 ms - -
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 78.747 ms - -
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 131.023 ms - -
-GET /ghost/api/v0.1/posts/2/?status=all&staticPages=all&include=tags 200 76.145 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 219.867 ms - -
-DELETE /ghost/api/v0.1/posts/2/ 204 139.318 ms - -
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 68.736 ms - -
-GET /ghost/api/v0.1/slugs/post/(Untitled)/ 200 110.837 ms - 31
-POST /ghost/api/v0.1/posts/?include=tags 201 119.802 ms - 479
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 90.819 ms - -
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 144.269 ms - -
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 207.297 ms - -
-GET / 200 102.683 ms - -
-GET /ghost/editor/3/ 200 101.009 ms - -
-GET /ghost/api/v0.1/settings/?type=blog%2Ctheme%2Cprivate 200 35.038 ms - -
-GET /ghost/api/v0.1/users/me/?include=roles&status=all 200 39.853 ms - 726
-GET /ghost/api/v0.1/notifications/ 200 30.542 ms - 20
-GET /ghost/api/v0.1/posts/3/?status=all&staticPages=all&include=tags 200 39.482 ms - -
-GET /ghost/api/v0.1/settings/?type=blog%2Ctheme%2Cprivate 200 21.556 ms - -
-GET /ghost/api/v0.1/tags/?limit=all 200 52.398 ms - 426
-GET /ghost/api/v0.1/users/?limit=all&include=roles 200 53.609 ms - 817
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 81.172 ms - -
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 228.299 ms - -
-GET / 200 139.860 ms - -
-
-```  
+[2018-05-01 15:36:01 +0000] [1] [INFO] Starting gunicorn 19.6.0
+[2018-05-01 15:36:01 +0000] [1] [INFO] Listening at: http://0.0.0.0:80 (1)
+[2018-05-01 15:36:01 +0000] [1] [INFO] Using worker: sync
+[2018-05-01 15:36:01 +0000] [10] [INFO] Booting worker with pid: 10
+[2018-05-01 15:36:01 +0000] [11] [INFO] Booting worker with pid: 11
+[2018-05-01 15:36:01 +0000] [12] [INFO] Booting worker with pid: 12
+[2018-05-01 15:36:01 +0000] [15] [INFO] Booting worker with pid: 15```  
 
 If you want to **follow** the log in real-time, use **-f** flag  
 
 ```
-docker logs -f ghost
-```  
 
-[Output]  
+To follow the logs,
 
 ```
-POST /ghost/api/v0.1/posts/?include=tags 422 165.523 ms - 120
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 66.134 ms - -
-GET /ghost/api/v0.1/slugs/post/(Untitled)/ 200 43.748 ms - 31
-POST /ghost/api/v0.1/posts/?include=tags 201 73.500 ms - 479
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 107.108 ms - 479
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 261.262 ms - 607
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 92.373 ms - 740
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 197.701 ms - 742
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 109.857 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 239.978 ms - 742
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 176.895 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 80.514 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 127.901 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 279.284 ms - -
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 78.747 ms - -
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 131.023 ms - -
-GET /ghost/api/v0.1/posts/2/?status=all&staticPages=all&include=tags 200 76.145 ms - -
-PUT /ghost/api/v0.1/posts/2/?include=tags 200 219.867 ms - -
-DELETE /ghost/api/v0.1/posts/2/ 204 139.318 ms - -
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 68.736 ms - -
-GET /ghost/api/v0.1/slugs/post/(Untitled)/ 200 110.837 ms - 31
-POST /ghost/api/v0.1/posts/?include=tags 201 119.802 ms - 479
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 90.819 ms - -
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 144.269 ms - -
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 207.297 ms - -
-GET / 200 102.683 ms - -
-GET /ghost/editor/3/ 200 101.009 ms - -
-GET /ghost/api/v0.1/settings/?type=blog%2Ctheme%2Cprivate 200 35.038 ms - -
-GET /ghost/api/v0.1/users/me/?include=roles&status=all 200 39.853 ms - 726
-GET /ghost/api/v0.1/notifications/ 200 30.542 ms - 20
-GET /ghost/api/v0.1/posts/3/?status=all&staticPages=all&include=tags 200 39.482 ms - -
-GET /ghost/api/v0.1/settings/?type=blog%2Ctheme%2Cprivate 200 21.556 ms - -
-GET /ghost/api/v0.1/tags/?limit=all 200 52.398 ms - 426
-GET /ghost/api/v0.1/users/?limit=all&include=roles 200 53.609 ms - 817
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 81.172 ms - -
-PUT /ghost/api/v0.1/posts/3/?include=tags 200 228.299 ms - -
-GET / 200 139.860 ms - -
-GET / 304 67.779 ms - -
-GET /assets/css/screen.css?v=5799f9cac6 304 2.539 ms - -
-GET /assets/js/jquery.fitvids.js?v=5799f9cac6 304 4.560 ms - -
-GET /assets/js/index.js?v=5799f9cac6 304 3.353 ms - -
-GET /assets/fonts/casper-icons.woff?v=1 304 0.889 ms - -
-GET /favicon.ico 200 0.134 ms - -
-GET /hi-there/ 200 131.892 ms - -
-
+docker logs -f vote
 ```  
+
 Now try to read the articles available in our blog and see the log output gets updated in real-time. Hit **ctrl+c** to break the stream  
 
-### Stream events from a container  
+### Stream events from the docker daemon   
 Docker **events** serves us with the stream of events or interactions that are happening with the docker daemon. This does not stream the log data of application inside the container. That is done by **docker logs** command. Let us see how this command works  
-Open an another terminal *(git bash)* from *vagrant parent directory* and ssh into your Docker host. Now you should have two terminals for  the same machine **(Docker host)**. Let us call the old terminal as **Terminal 1** and the newer one as **Terminal 2**.
+Open an another terminal. Let us call the old terminal as **Terminal 1** and the newer one as **Terminal 2**.
 
 From Terminal 1, execute **docker events**. Now you are getting the data stream from docker daemon  
 
@@ -478,7 +161,7 @@ docker events
 To understand how this command actually works, let us run a container from Terminal 2  
 
 ```
-docker run -ti alpine:3.4 sh  
+docker run -it alpine:3.4 sh  
 ```  
 
 If you see, in Terminal 1, the interaction with docker daemon, while running that container will be printed  
@@ -496,28 +179,23 @@ If you see, in Terminal 1, the interaction with docker daemon, while running tha
 Try to do various docker operations (start, stop, rm, etc.,) and see the output in Terminal 1  
 
 ### Attach to the container  
-Normally, when we run a container, we use **-d** flag to run that container in detached mode. But sometimes you might require to make some changes inside that container. In those kind of situations, we can use **attach** command. This command attaches to the tty of docker container. So it will stream the output of the application. In our case, we will see the output of ghost application  
+Normally, when we run a container, we use **-d** flag to run that container in detached mode. But sometimes you might require to make some changes inside that container. In those kind of situations, we can use **attach** command. This command attaches to the tty of docker container. So it will stream the output of the application. In our case, we will see the output of vote application  
 
 ```
-docker attach ghost
+docker attach vote
 ```  
 Hit our blogs url several times to see the output  
 
 [Output]  
 
 ```
-POST /ghost/api/v0.1/authentication/token 200 418.439 ms - -
-GET /ghost/api/v0.1/settings/?type=blog%2Ctheme%2Cprivate 200 69.950 ms - -
-GET /ghost/img/invite-placeholder.png 200 1.279 ms - 7860
-GET /ghost/img/users.png 200 4.739 ms - 49253
-GET /ghost/api/v0.1/users/me/?include=roles&status=all 200 64.548 ms - 726
-GET /ghost/api/v0.1/notifications/ 200 43.159 ms - 513
-GET /ghost/api/v0.1/posts/?page=1&limit=15&status=all&staticPages=all&include=tags 200 61.997 ms - -
-GET /ghost/img/ghosticon.jpg 200 2.592 ms - 2499
+root@swarm-03:~# docker attach vote
+[2018-05-01 15:44:49 +0000] [1] [INFO] Handling signal: winch
 
 ```  
 
-You can detach from the tty by pressing **ctrl-p + ctrl-q** in sequence. If you haven't started your container with ** -itd ** flag, then it is not possible to get your host's terminal back. In that case, If you haven't started the container with **-itd** option, then you have to use **--sig-proxy=false** falg with the attach command.  Then you will be able to detach from the container by using **ctrl-c**  
+You can detach from the tty by pressing **ctrl-p + ctrl-q** in sequence. If you haven't started your container with **-it** flag, then it is not possible to get your host's terminal back. In that case, If you haven't started the container with **-it** option, the only way you will be able to detach  from the container by using **ctrl-c**, which kills the process, in turns the container itself.   
+
 It is possible to override these keys too. For that we have to add --detach-keys flag to the command. To learn more, click on the following URL  
 
 https://docs.docker.com/engine/reference/commandline/attach/  
@@ -532,12 +210,12 @@ touch testfile
 
 To copy the testfile **from host machine to ghsot contanier**, try  
 ```
-docker cp testfile ghost:/opt  
+docker cp testfile vote:/opt  
 ```  
-This command will copy testfile to ghost container's **/opt** directory  and will not give any output. To verify the file has been copies or not, let us log into container by running,  
+This command will copy testfile to vote container's **/opt** directory  and will not give any output. To verify the file has been copies or not, let us log into container by running,  
 
 ```
-docker exec -it ghost bash
+docker exec -it vote bash
 ```  
 Change directory into /opt and list the files  
 
@@ -555,65 +233,55 @@ testfile
 There you can see that file has been successfully copied. Now exit the container  
 
 Now you may try to cp some files **from the container to the host machine**  
-Before that you have to change host machine's current working directory to **/vagrant**. This has to be done, because the CentOS VM is **mounted** that directory only.  
 
 ```
-cd /vagrant  
-docker cp ghost:/usr/src/ghost .  
+docker cp vote:/app  .  
 ls  
 ```  
-You might get some protocol errors. The reason for this is, it tries to create a symlink to a file on host machine, which does not exist.  
-
-### Rename a  container  
-When you want to rename a container, we can use use **rename** command. Let us change our **ghost** container's name to **ghostapp**. Try *docker ps* to see the changes,
-
- ```
- docker rename ghost ghostapp  
- docker ps  
- ```  
-
- [Output]  
-
- ```
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES
-b28efeef41f8        ghost:0.10.1        "/entrypoint.sh npm s"   20 hours ago        Up 2 minutes        0.0.0.0:32768->2368/tcp   ghostapp
- ```
 
 ### Controlling Resources  
 Docker provides us the granularity to control each container's **resource utilization**. We have several commands in the inventory to achieve this  
 
 #### Putting limits on Running Containers  
-First, let us see the memory utilization of our ghostapp container, by trying
+First, let us monitor the utilization
 
 ```
-docker inspect ghostapp | grep -i memory  
+docker stats --no-stream=true
 ```  
 
-[Output]  
+[Example Output]  
 
 ```
-"Memory": 0,
-"KernelMemory": 0,
-"MemoryReservation": 0,
-"MemorySwap": 0,
-"MemorySwappiness": -1,
+"docker stats --no-stream=true
+CONTAINER ID        NAME                                CPU %               MEM USAGE / LIMIT     MEM %               NET I/O             BLOCK I/O           PIDS
+7d58ecc05754        vote                                0.02%               56.5MiB / 1.955GiB    2.82%               648B / 0B           0B / 0B             0
+9fc1aec8cb6a        gallant_brattain                    0.00%               328KiB / 1.955GiB     0.02%               690B / 0B           0B / 0B             0
+08f0242aa61c        vote.2.qwxduexkwpmdnowouxjzwjwag    0.02%               56.33MiB / 1.955GiB   2.81%               1.94kB / 0B         0B / 0B             0
+8469b95efc81        redis.4.s5i3kid9yohpbim05bsw59sh2   0.12%               6.223MiB / 1.955GiB   0.31%               1.36kB / 0B         0B / 0B             0
+ce823d38adaf        redis.1.qfx6geh6t9vuy8awq94u10m07   0.08%               6.227MiB / 1.955GiB   0.31%               7.25kB / 5.39kB     0B / 0B             0
 ```  
 
+For monitoring resources continuously,
+
+```
+docker stats --no-stream=true
+```  
 You can see that **Memory** attribute has **0** as its value. 0 means unlimited usage of host's RAM. We can put a cap on that by using **update** command  
 
 ```
-docker update -m 400M ghostapp  
+docker update --memory 400M --memory-swap -1 vote   
 ```  
 
 [Output]  
 
 ```
-ghostapp
+vote
 ```  
 Let us check whether the change has taken effect or not  
 
 ```
-docker inspect ghostapp | grep -i memory
+docker inspect vote | grep -i memory
+docker stat 
 ```  
 
 [Output]  

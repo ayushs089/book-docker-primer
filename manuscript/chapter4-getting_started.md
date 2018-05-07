@@ -90,112 +90,62 @@ docker -v
 
 docker version  
 
-docker info  
+docker system info
 ```  
 
 [Output of **docker -v**]  
 
 ```
-Docker version 1.12.1, build 23cf638
+Docker version 18.03.1-ce, build 9ee9f40
 ```  
 
 [Output of **docker version**]  
 
 ```
 Client:
- Version:      1.12.1
- API version:  1.24
- Go version:   go1.6.3
- Git commit:   23cf638
- Built:
+ Version:      18.03.1-ce
+ API version:  1.37
+ Go version:   go1.9.5
+ Git commit:   9ee9f40
+ Built:        Thu Apr 26 07:18:46 2018
  OS/Arch:      linux/amd64
+ Experimental: false
+ Orchestrator: swarm
 
 Server:
- Version:      1.12.1
- API version:  1.24
- Go version:   go1.6.3
- Git commit:   23cf638
- Built:
- OS/Arch:      linux/amd64
+ Engine:
+  Version:      18.03.1-ce
+  API version:  1.37 (minimum version 1.12)
+  Go version:   go1.9.5
+  Git commit:   9ee9f40
+  Built:        Thu Apr 26 07:16:59 2018
+  OS/Arch:      linux/amd64
+  Experimental: false
 ```  
 
-[Output of **docker info**]  
-```
-Containers: 10
- Running: 0
- Paused: 0
- Stopped: 10
-Images: 8
-Server Version: 1.12.1
-Storage Driver: devicemapper
- Pool Name: docker-253:0-135975386-pool
- Pool Blocksize: 65.54 kB
- Base Device Size: 10.74 GB
- Backing Filesystem: xfs
- Data file: /dev/loop0
- Metadata file: /dev/loop1
- Data Space Used: 1.084 GB
- Data Space Total: 107.4 GB
- Data Space Available: 42.22 GB
- Metadata Space Used: 2.052 MB
- Metadata Space Total: 2.147 GB
- Metadata Space Available: 2.145 GB
- Thin Pool Minimum Free Space: 10.74 GB
- Udev Sync Supported: true
- Deferred Removal Enabled: false
- Deferred Deletion Enabled: false
- Deferred Deleted Device Count: 0
- Data loop file: /var/lib/docker/devicemapper/devicemapper/data
- WARNING: Usage of loopback devices is strongly discouraged for production use. Use `--storage-opt dm.thinpooldev` to specify a custom block storage device.
- Metadata loop file: /var/lib/docker/devicemapper/devicemapper/metadata
- Library Version: 1.02.107-RHEL7 (2016-06-09)
-Logging Driver: json-file
-Cgroup Driver: cgroupfs
-Plugins:
- Volume: local
- Network: bridge host null overlay
-Swarm: inactive
-Runtimes: runc
-Default Runtime: runc
-Security Options: seccomp
-Kernel Version: 3.10.0-327.28.3.el7.x86_64
-Operating System: CentOS Linux 7 (Core)
-OSType: linux
-Architecture: x86_64
-CPUs: 1
-Total Memory: 1.797 GiB
-Name: dockerserver
-ID: QV4Z:HQZP:6ANK:PU5X:554Y:JA2Z:TZ54:ODDN:2HYJ:N4LW:WVZF:AG3L
-Docker Root Dir: /var/lib/docker
-Debug Mode (client): false
-Debug Mode (server): false
-Registry: https://index.docker.io/v1/
-Insecure Registries:
- 127.0.0.0/8
 
-```  
-The **docker info** command gives a lot of useful information like total number of containers and images along with information about host resource utilization  
+The **docker system info** command gives a lot of useful information like total number of containers and images along with information about host resource utilization  etc.
 
 ### Launching our first container  
 Now we have a basic understanding of docker command and sub commands, let us dive straight into launching our very first **container**  
 
 ```
-docker run alpine uptime
+docker run alpine:3.4 uptime
 ```  
 Where,
   * we are using docker **client** to
   * run a application/command **uptime** using  
-  * an image by name **alpine**
+  * an image by name **alpine:3.4**
 
 [Output]  
 ```
-docker run alpine uptime
-Unable to find image 'alpine:latest' locally
-latest: Pulling from library/alpine
-117f30b7ae3d: Pull complete
-Digest: sha256:02eb5cfe4b721495135728ab4aea87418fd4edbfbf83612130a81191f0b2aae3
-Status: Downloaded newer image for alpine:latest
- 07:45:40 up  3:13,  load average: 0.00, 0.00, 0.00
+Unable to find image 'alpine:3.4' locally
+3.4: Pulling from library/alpine
+81033e7c1d6a: Pull complete
+Digest: sha256:2532609239f3a96fbc30670716d87c8861b8a1974564211325633ca093b11c0b
+Status: Downloaded newer image for alpine:3.4
+
+ 15:24:34 up  7:36,  load average: 0.00, 0.03, 0.04
 ```  
 
 **What happened?**  
@@ -207,6 +157,12 @@ This command will
   * Stop the container once the program is exited
 
 **Where did my container go?**  
+
+```
+docker container  ps
+
+docker container  ps -l
+```
 
 The point here to remember is that, when that executable stops running inside the container, the container itself will stop  
 This process will further be explained under the **lifecycle of a container** topic.
@@ -283,18 +239,17 @@ We can interact with docker containers by giving -it flags at the run time. Thes
   * t - tty
 
 ```
-docker run -it alpine:3.4 sh
+docker run -it alpine sh
 ```  
 
 [Output]  
 
 ```
-Unable to find image 'alpine:3.4' locally
-3.4: Pulling from library/alpine
-
-e110a4a17941: Pull complete
-Digest: sha256:3dcdb92d7432d56604d4545cbd324b14e647b313626d99b889d0626de158f73a
-Status: Downloaded newer image for alpine:3.4
+Unable to find image 'alpine:latest' locally
+latest: Pulling from library/alpine
+ff3a5c916c92: Already exists
+Digest: sha256:7df6db5aa61ae9480f52f0b3a06a140ab98d427f86d8d5de0bedab9b8df6b1c0
+Status: Downloaded newer image for alpine:latest
 / #
 ```  
 
@@ -457,13 +412,14 @@ Now exit out of that container by running **exit** or by pressing **ctrl+d**
 
 
 ### Making Containers Persist  
+
 #### Running Containers in Detached Mode  
 So far, we have run the containers interactively. But this is not always the case. Sometimes you may want to start a container  without interacting with it. This can be achieved by using **"detached mode"** (**-d**) flag. Hence the container will launch the deafault application inside and run in the background. This saves a lot of time, we don't have to wait till the applications launches successfully. It will happen behind the screen. Let us run the following command to see this in action  
 
 [Command]  
 
 ```
-docker run -d schoolofdevops/loop program
+docker run -idt schoolofdevops/loop program
 ```  
 
 -d , --detach : detached mode  
@@ -489,6 +445,23 @@ CONTAINER ID        IMAGE                 COMMAND             CREATED           
 ```  
 As we can see in the output, the container is running in the background  
 
+
+#### Checking Logs
+
+To check the logs, find out the container id/name and run the following commands, replacing 08f0242aa61c with your container id
+
+
+[Commands]  
+```
+docker container ps
+
+docker container logs 08f0242aa61c
+
+docker container logs -f  08f0242aa61c
+```  
+
+
+
 #### Connecting to running container to execute commands
 We can connect to the containers which are running in detached mode by using these following commands  
 [Command]  
@@ -501,6 +474,16 @@ docker exec -it 2533adf280ac sh
 ```
 / #
 ```  
+
+You could try running any commands on the shell
+e.g.
+
+```
+apk update
+apk add vim
+ps aux
+```
+
 Now exit the container.  
 
 #### Pausing Running Container  
@@ -582,6 +565,46 @@ docker ps --format "{{.ID}}: {{.Status}}"
 ```
 2533adf280ac: Up 12 minutes
 ```  
+
+### Checking disk utilisation by
+
+```
+
+docker system df
+
+```
+
+[output]
+```
+docker system df
+TYPE                TOTAL               ACTIVE              SIZE                RECLAIMABLE
+Images              7                   5                   1.031GB             914.5MB (88%)
+Containers          8                   4                   27.97MB             27.73MB (99%)
+Local Volumes       3                   2                   0B                  0B
+Build Cache                                                 0B                  0B
+```
+
+To prune, you could possibly use
+
+```
+docker container prune
+
+docker system prune
+```
+
+e.g.
+```
+docker system prune
+WARNING! This will remove:
+        - all stopped containers
+        - all networks not used by at least one container
+        - all dangling images
+        - all build cache
+Are you sure you want to continue? [y/N]
+```
+
+Make sure you understand what all will be removed before using this command.
+
 
 ### Stopping and Removing Containers
 We have learnt about interacting with a container, running a container, pausing and unpausing a container, creating and starting a container. But what if you want to stop the container or remove the container itself  
